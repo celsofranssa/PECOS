@@ -1,0 +1,5 @@
+name: AmazonCat-13k
+dir: resource/dataset/AmazonCat-13k/
+num_labels: 13330
+folds: [0,1,2,3,4]
+

@@ -1,0 +1,5 @@
+name: Wiki-500k
+dir: resource/dataset/Wiki-500k/
+num_labels: 501008
+folds: [1,2,3,4]
+

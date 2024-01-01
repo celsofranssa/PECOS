@@ -1,0 +1,35 @@
+defaults:
+  - _self_
+  - model: XLinear
+  - data: Wiki10-31k
+
+tasks: ["eval"]
+
+
+eval:
+  metrics: ["mrr","ndcg","precision","recall"]
+  thresholds: [1,5,10]
+  label_cls: ["all", "head", "tail"]
+
+log:
+  dir: resource/log/
+
+model_checkpoint:
+  dir: resource/model_checkpoint/
+
+prediction:
+  dir: resource/prediction/
+
+ranking:
+  dir: resource/ranking/
+
+result:
+  dir: resource/result/
+
+
+
+
+
+
+
+

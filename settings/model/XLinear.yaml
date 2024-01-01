@@ -1,0 +1,50 @@
+name: XLinear
+train_params:
+  __meta__:
+    class_fullname: pecos.xmc.xlinear.model###XLinearModel.TrainParams
+  mode: full-model
+  ranker_level: 1
+  nr_splits: 16
+  min_codes:
+  shallow: false
+  rel_mode: disable
+  rel_norm: no-norm
+  hlm_args:
+    __meta__:
+      class_fullname: pecos.xmc.base###HierarchicalMLModel.TrainParams
+    neg_mining_chain: tfn
+    model_chain:
+      __meta__:
+        class_fullname: pecos.xmc.base###MLModel.TrainParams
+      threshold: 0.1
+      max_nonzeros_per_label:
+      solver_type: L2R_L2LOSS_SVC_DUAL
+      Cp: 1
+      Cn: 1
+      max_iter: 100
+      eps: 0.1
+      bias: 1
+      threads: -1
+      verbose: 1
+      newton_eps: 0.01
+pred_params:
+  __meta__:
+    class_fullname: pecos.xmc.xlinear.model###XLinearModel.PredParams
+  hlm_args:
+    __meta__:
+      class_fullname: pecos.xmc.base###HierarchicalMLModel.PredParams
+    model_chain:
+      __meta__:
+        class_fullname: pecos.xmc.base###MLModel.PredParams
+      only_topk: 20
+      post_processor: l3-hinge
+indexer_params:
+  __meta__:
+    class_fullname: pecos.xmc.base###HierarchicalKMeans.TrainParams
+  nr_splits: 16
+  min_codes:
+  max_leaf_size: 100
+  spherical: true
+  seed: 0
+  kmeans_max_iter: 20
+  threads: -1
