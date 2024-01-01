@@ -62,15 +62,16 @@ class EvalHelper:
     def perform_eval(self):
 
         results = []
-        rankings = []
+        rankings = {}
 
-        for fold_id in self.helper.params.data.folds:
+        for fold_idx in self.helper.params.data.folds:
+            rankings[fold_idx] = {}
             print(
-                f"Evaluating {self.params.model.name} over {self.params.data.name} (fold {fold_id}) with fowling params\n"
+                f"Evaluating {self.params.model.name} over {self.params.data.name} (fold {fold_idx}) with fowling params\n"
                 f"{OmegaConf.to_yaml(self.params)}\n")
 
-            prediction = self.helper.load_prediction(fold_id)
-            ids_map = self._load_ids_map(fold_id)
+            prediction = self.helper.load_prediction(fold_idx)
+            ids_map = self._load_ids_map(fold_idx)
 
             for cls in self.params.eval.label_cls:
                 ranking = self._retrieve(prediction, ids_map, cls)
@@ -80,13 +81,15 @@ class EvalHelper:
                 run = Run(ranking, name=cls)
                 result = evaluate(qrels, run, self.metrics, threads=12)
                 result = {k: round(v, 3) for k, v in result.items()}
-                result["fold"] = fold_id
+                result["fold"] = fold_idx
                 result["cls"] = cls
                 #rankings.append(ranking)
+                rankings[fold_idx][cls] = ranking
                 results.append(result)
+            self.checkpoint_ranking(rankings[fold_idx], fold_idx)
 
         self.helper.checkpoint_results(results)
-        #self.helper.checkpoint_rankings(rankings)
+
 
     def _load_relevance_map(self):
         with open(f"{self.params.data.dir}relevance_map.pkl", "rb") as relevances_file:

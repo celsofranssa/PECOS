@@ -131,6 +131,13 @@ class Helper:
             self.params.result.dir + self.params.model.name + "_" + self.params.data.name + ".rts",
             sep='\t', index=False, header=True)
 
+    def checkpoint_ranking(self, ranking, fold_idx):
+        ranking_dir = f"{self.params.ranking.dir}{self.params.model.name}_{self.params.data.name}/"
+        Path(ranking_dir).mkdir(parents=True, exist_ok=True)
+        print(f"Saving ranking {fold_idx} on {ranking_dir}")
+        with open(f"{ranking_dir}{self.params.model.name}_{self.params.data.name}_{fold_idx}.rnk", "wb") as ranking_file:
+            pickle.dump(ranking, ranking_file)
+
     # ranking
     def checkpoint_rankings(self, ranking):
         ranking_path = f"{self.params.ranking.dir}" \
