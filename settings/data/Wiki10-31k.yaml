@@ -1,5 +1,10 @@
 name: Wiki10-31k
 dir: resource/dataset/Wiki10-31k/
-num_labels: 30938
 folds: [0,1,2,3,4]
+max_features: 50000
+num_labels: 30938
+
+# averaged number of relevant (4 tail + 15 head) labels
+num_relevant_labels: 19
+
 

@@ -2,8 +2,8 @@
 source venv/bin/activate
 export PYTHONPATH=PYTHONPATH:$pwd
 
-model=XLinear
-data=AmazonCat-13K
+model=XR-TFMR-AmazonCat-13k
+data=AmazonCat-13k
 fold_idx=0
 
 time_start=$(date '+%Y-%m-%d %H:%M:%S')

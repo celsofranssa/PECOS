@@ -3,3 +3,6 @@ dir: resource/dataset/Amazon-670k/
 folds: [0,1,2,3,4]
 max_features: 50000
 num_labels: 670091
+
+# averaged number of relevant (3 tail + 3 head) labels
+num_relevant_labels: 6

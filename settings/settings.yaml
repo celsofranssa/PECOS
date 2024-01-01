@@ -7,9 +7,9 @@ tasks: ["eval"]
 
 
 eval:
-  metrics: ["mrr","ndcg","precision","recall"]
+  metrics: ["ndcg","precision"]
   thresholds: [1,5,10]
-  label_cls: ["all", "head", "tail"]
+  label_cls: ["tail", "head"]
 
 log:
   dir: resource/log/

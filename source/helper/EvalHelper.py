@@ -27,6 +27,8 @@ class EvalHelper:
         for metric in self.params.eval.metrics:
             for threshold in self.params.eval.thresholds:
                 metrics.append(f"{metric}@{threshold}")
+            metrics.append(f"{metric}@{self.params.data.num_relevant_labels}")
+
         return metrics
 
     # def _retrieve(self, prediction, ids_map, cls):
