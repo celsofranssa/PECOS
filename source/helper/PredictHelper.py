@@ -36,5 +36,6 @@ class PredictHelper:
 
             if self.params.model.name == "XLinear":
                 # prediction is a csr_matrix with shape=(N, L)
-                prediction = model.predict(texts_rpr)
+                prediction = model.predict(texts_rpr, max_pred_chunk=2048, threads=-1, only_topk=32,
+                                           post_processor='l3-hinge')
                 self.helper.checkpoint_prediction(prediction, fold_id)

@@ -1,4 +1,5 @@
 import pickle
+from pathlib import Path
 
 import numpy as np
 import pandas as pd
@@ -45,22 +46,43 @@ class EvalHelper:
     #                 ranking[f"text_{text_idx}"][f"label_{label_idx}"] = prediction[row, label_idx]
     #     return ranking
 
+    # def _retrieve(self, prediction, ids_map, cls):
+    #     ranking = {}
+    #     rows, cols = prediction.nonzero()
+    #     for row in tqdm(set(rows), desc="Ranking"):
+    #         text_idx = ids_map[row]
+    #         if cls in self.texts_cls[text_idx]:
+    #             labels_scores = {}
+    #             for label_idx in set(cols):
+    #                 if cls in self.labels_cls[label_idx]:
+    #                     labels_scores[f"label_{label_idx}"] = prediction[row, label_idx]
+    #             ranking[f"text_{text_idx}"] = labels_scores if len(labels_scores) > 0 else {"label_-1": 0.0}
+    #
+    #     return ranking
+
     def _retrieve(self, prediction, ids_map, cls):
         ranking = {}
         rows, cols = prediction.nonzero()
-        for row in tqdm(set(rows), desc="Ranking"):
+        for row, label_idx in tzip(rows, cols, desc=f"Ranking {cls} labels"):
+        #for row, label_idx in tqdm(zip(rows, cols), desc="Ranking"):
             text_idx = ids_map[row]
             if cls in self.texts_cls[text_idx]:
-                labels_scores = {}
-                for label_idx in set(cols):
-                    if cls in self.labels_cls[label_idx]:
-                        labels_scores[f"label_{label_idx}"] = prediction[row, label_idx]
-                ranking[f"text_{text_idx}"] = labels_scores if len(labels_scores) > 0 else {"label_-1": 0.0}
+                if f"text_{text_idx}" not in ranking:
+                    ranking[f"text_{text_idx}"] = {"label_-1": 0.0}
+                if cls in self.labels_cls[label_idx]:
+                    ranking[f"text_{text_idx}"][f"label_{label_idx}"] = prediction[row, label_idx]
+
+        # error = 0
+        # for key, value in ranking.items():
+        #     if len(value) < 1:
+        #         error += 1
+        #         print(f"\n\nERROR {key}\n\n")
+        #
+        # print(f"\n\nERROR {error}\n\n")
 
         return ranking
 
     def perform_eval(self):
-
         results = []
         rankings = {}
 
@@ -75,21 +97,28 @@ class EvalHelper:
 
             for cls in self.params.eval.label_cls:
                 ranking = self._retrieve(prediction, ids_map, cls)
-                print(f"Ranking ({len(ranking)}) for {cls}")
+                # print(f"Ranking ({len(ranking)}) for {cls}")
                 filtered_dictionary = {key: value for key, value in self.relevance_map.items() if key in ranking.keys()}
-                qrels = Qrels(filtered_dictionary, name=cls)
-                run = Run(ranking, name=cls)
-                result = evaluate(qrels, run, self.metrics, threads=12)
+                qrels = Qrels(filtered_dictionary)
+                run = Run(ranking)
+                result = evaluate(qrels, run, self.metrics)
                 result = {k: round(v, 3) for k, v in result.items()}
                 result["fold"] = fold_idx
                 result["cls"] = cls
-                #rankings.append(ranking)
+
                 rankings[fold_idx][cls] = ranking
                 results.append(result)
             self.checkpoint_ranking(rankings[fold_idx], fold_idx)
 
         self.helper.checkpoint_results(results)
 
+    def checkpoint_ranking(self, ranking, fold_idx):
+        ranking_dir = f"{self.params.ranking.dir}{self.params.model.name}_{self.params.data.name}/"
+        Path(ranking_dir).mkdir(parents=True, exist_ok=True)
+        print(f"Saving ranking {fold_idx} on {ranking_dir}")
+        with open(f"{ranking_dir}{self.params.model.name}_{self.params.data.name}_{fold_idx}.rnk",
+                  "wb") as ranking_file:
+            pickle.dump(ranking, ranking_file)
 
     def _load_relevance_map(self):
         with open(f"{self.params.data.dir}relevance_map.pkl", "rb") as relevances_file:

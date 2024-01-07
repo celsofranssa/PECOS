@@ -65,14 +65,19 @@ def mean_confidence_interval(data, confidence=0.95):
     h = se * scipy.stats.t.ppf((1 + confidence) / 2., n - 1)
     return f"{round(100 * m, 1)}({round(100 * h, 1)})"
 
-def ic(model, dataset):
-    print(f"{model}: {dataset}")
+
+def ic(model, dataset, metrics, thresholds):
+    print(f"Eval results for {model} in {dataset}:")
     result_df = pd.read_csv(f"resource/result/{model}_{dataset}.rts", header=0, sep="\t")
-    for cls in ["tail", "head"]:
-        print(f"Results for {cls}")
-        cls_df = result_df[result_df["cls"] == cls]
-        for metric in ['mrr@1', 'mrr@5', 'mrr@10', 'ndcg@1', 'ndcg@5', 'ndcg@10']:
-            print(f"{metric}: {mean_confidence_interval(cls_df[metric])}")
+    s = ""
+    for metric in metrics:
+        for cls in ["tail", "head"]:
+            cls_df = result_df[result_df["cls"] == cls]
+            print([f"{metric}@{t}" for t in thresholds])
+            for m in [f"{metric}@{t}" for t in thresholds]: #['ndcg@1', 'ndcg@5', 'ndcg@10', 'ndcg@19']:
+                v = mean_confidence_interval(cls_df[m])
+                s = s + f"{v}\t"
+    print(s)
 
 def read_prediction(model, dataset, fold_idx):
     with open(f"resource/prediction/{model}_{dataset}_{fold_idx}.prd", "rb") as prediction_file:
@@ -80,5 +85,8 @@ def read_prediction(model, dataset, fold_idx):
     print()
 
 if __name__ == '__main__':
+    model = "XLinear"
+    dataset = "Amazon-670k"
+    ic(model=model, dataset=dataset, metrics=["ndcg", "precision"], thresholds=[1, 5, 10, 6])
     #read_prediction(model="XLinear", dataset="Wiki10-31k", fold_idx=0)
-    ic(model="XR-TFMR", dataset="Wiki10-31k")
+    #ic(model="XR-TFMR", dataset="Wiki10-31k")

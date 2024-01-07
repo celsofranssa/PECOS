@@ -4,7 +4,7 @@
 
 ```shell script
 # clone the project 
-git clone https://github.com/celsofranssa/XMTC-Baselines.git
+git clone https://github.com/celsofranssa/PECOS.git
 
 # change directory to project folder
 cd XMTC-Baselines/
